@@ -54,6 +54,14 @@ app.use(cookieParser());
     res.render("urls_new", templateVars);
   });
 
+  //Registration Page
+  app.get("/urls/registration", (req, res) => {
+    const templateVars = {
+      username: req.cookies["username"]
+    };
+    res.render("urls_register", templateVars)
+  });
+
   //Action when a new URL is Created
   //Posts the new URL on home page
   app.post("/urls", (req, res) => {
