@@ -2,6 +2,9 @@ var express = require('express');
 var app = express();
 var PORT = 8080; //default port 8080
 const bodyParser = require("body-parser");
+const cookieParser = require('cookie-parser');
+app.use(cookieParser());
+
 
   app.set("view engine", "ejs");
   app.use(bodyParser.urlencoded({extended: true}));
@@ -21,15 +24,34 @@ const bodyParser = require("body-parser");
      "9sm5xK": "http://www.google.com"
    };
 
+    //Allows person to login
+    app.post("/urls/login", (req, res) => {
+      res.cookie("username", req.body.username);
+      res.redirect("/urls");
+    });
+
+    //Allows person to logout
+    app.post("/urls/logout", (req, res) => {
+      var submit = req.body.username;
+      res.clearCookie("username", submit)
+      res.redirect("/urls");
+    })
+
     //Home Page: Displays Submitted URL Data
     app.get("/urls", (req, res) => {
-      const templateVars = {urls: urlDatabase};
+      const templateVars = {
+        urls: urlDatabase,
+        username: req.cookies["username"]
+      };
       res.render("urls_index", templateVars);
    });
 
   //Page to Create A New TinyURL
   app.get("/urls/new", (req, res) => {
-    res.render("urls_new");
+    const templateVars = {
+      username: req.cookies["username"]
+    };
+    res.render("urls_new", templateVars);
   });
 
   //Action when a new URL is Created
@@ -37,8 +59,6 @@ const bodyParser = require("body-parser");
   app.post("/urls", (req, res) => {
     var shortURL = generateRandomString();
     urlDatabase[shortURL] = req.body.longURL;
-    console.log(shortURL)
-    console.log(req.body);
     res.redirect("/urls");
    });
 
@@ -61,13 +81,20 @@ const bodyParser = require("body-parser");
   //Takes us to the individual page of a URL
   // Displays both the long and short URL
   app.get("/urls/:id", (req, res) => {
-    const templateVars = {shortURL: req.params.id, longURL: urlDatabase[req.params.id] };
+    const templateVars = {
+      shortURL: req.params.id,
+      longURL: urlDatabase[req.params.id],
+      username: req.cookies["username"]
+    };
     res.render("urls_show", templateVars);
    });
 
   //A page in which we can update and existing URL
   app.get("/urls/:id", (req, res) =>{
-    const templateVars = {shortURL: req.params.id};
+    const templateVars = {
+      shortURL: req.params.id,
+      username: req.cookies["username"]
+    };
     res.render("urls_show", templateVars);
   });
 
