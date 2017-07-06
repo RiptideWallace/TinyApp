@@ -7,12 +7,12 @@ app.use(cookieParser());
 
 //Object used to store user information once they register
 const users = {
-  "userRandomID": {
+  "user@example.com": {
     id: "userRandomID",
     email: "user@example.com",
     password: "purple-monkey-dinosaur"
   },
-  "user2RandomID": {
+  "user2@example.com": {
     id: "user2RandomID",
     email: "user2@exmaple.com",
     password: "dishwasher-funk"
@@ -33,8 +33,12 @@ const users = {
 }
 
    var urlDatabase = {
-     "b2xVn2": "http://www.lighthouselabs.ca",
-     "9sm5xK": "http://www.google.com"
+     "userRandomID": {
+        "b2xVn2": "http://www.lighthouselabs.ca"
+      },
+    "user2RandomID": {
+        "9sm5xK": "http://www.google.com"
+    }
    };
 
     app.get("/urls/login", (req, res) => {
@@ -44,17 +48,45 @@ const users = {
       res.render("urls_login", templateVars);
     })
 
+  //Registration Page
+  app.get("/urls/registration", (req, res) => {
+    const templateVars = {
+      user_ID: req.cookies["User ID"]
+    };
+    res.render("urls_register", templateVars)
+  });
+
+  //Action when a new person registers
+  app.post("/urls/registration", (req, res) => {
+    var email = req.body.email
+    var password = req.body.password
+    var user_ID = generateRandomString();
+    var newUser = {
+      id: user_ID,
+      email: req.body.email,
+      password: req.body.password
+    }
+    users[req.body.email] = newUser;
+
+     if (email == false || password == false) {
+        res.status(404).send('Registration Failed :(');
+     } else {
+    res.cookie("User ID", user_ID);
+    res.redirect("/urls");
+     }
+  }),
+
     //Allows person to login
     app.post("/urls/login", (req, res) => {
-      var user_ID = generateRandomString();
       var email = req.body.email
       var password = req.body.password
 
-      if (email != email) {
+      if (!users[email] || email != users[email].email) {
          res.status(403).send('Login Failed :(');
-      } else if (password != password) {
+      } else if (password != users[email].password) {
           res.status(403).send('Login Failed :(');
-        } else {
+        } else  {
+      var user_ID = users[email].id;
       res.cookie("User ID", user_ID);
       res.redirect("/urls");
       }
@@ -62,8 +94,7 @@ const users = {
 
     //Allows person to logout
     app.post("/urls/logout", (req, res) => {
-      var user_ID = generateRandomString();
-      res.clearCookie("User ID", user_ID);
+      res.clearCookie("User ID");
       res.redirect("/urls");
     })
 
@@ -84,40 +115,12 @@ const users = {
     res.render("urls_new", templateVars);
   });
 
-  //Registration Page
-  app.get("/urls/registration", (req, res) => {
-    const templateVars = {
-      user_ID: req.cookies["User ID"]
-    };
-    res.render("urls_register", templateVars)
-  });
-
-  //Action when a new person registers
-  app.post("/urls/registration", (req, res) => {
-    var email = req.body.email
-    var password = req.body.password
-    var user_ID = generateRandomString();
-    var newUser = {
-      id: user_ID,
-      email: req.body.email,
-      password: req.body.password
-    }
-    users[user_ID] = newUser;
-
-     if (email || password === undefined) {
-        res.status(404).send('Registration Failed :(');
-     } else {
-    res.cookie("User ID", user_ID);
-    res.redirect("/urls");
-     }
-  }),
-
-
   //Action when a new URL is Created
   //Posts the new URL on home page
   app.post("/urls", (req, res) => {
     var shortURL = generateRandomString();
-    urlDatabase[shortURL] = req.body.longURL;
+    var userID = users[id];
+    urlDatabase[shortURL, userID] = req.body.longURL;
     res.redirect("/urls");
    });
 
