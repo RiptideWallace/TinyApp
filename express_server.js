@@ -44,8 +44,8 @@ const users = {
 
     //Allows person to logout
     app.post("/urls/logout", (req, res) => {
-      var submit = req.body.username;
-      res.clearCookie("username", submit)
+      var user_ID = generateRandomString;
+      res.clearCookie("User ID", user_ID);
       res.redirect("/urls");
     })
 
@@ -53,7 +53,7 @@ const users = {
     app.get("/urls", (req, res) => {
       const templateVars = {
         urls: urlDatabase,
-        username: req.cookies["username"]
+        user_ID: req.cookies["User ID"]
       };
       res.render("urls_index", templateVars);
    });
@@ -61,7 +61,7 @@ const users = {
   //Page to Create A New TinyURL
   app.get("/urls/new", (req, res) => {
     const templateVars = {
-      username: req.cookies["username"]
+      user_ID: req.cookies["User ID"]
     };
     res.render("urls_new", templateVars);
   });
@@ -69,7 +69,7 @@ const users = {
   //Registration Page
   app.get("/urls/registration", (req, res) => {
     const templateVars = {
-      username: req.cookies["username"]
+      user_ID: req.cookies["User ID"]
     };
     res.render("urls_register", templateVars)
   });
@@ -87,9 +87,9 @@ const users = {
     users[user_ID] = newUser;
 
     if (email || password === undefined) {
-      res.status(404).send('Registration Failed :(');
-    } else {
-    res.cookie("User ID", users[user_ID]);
+       res.status(404).send('Registration Failed :(');
+     } else {
+    res.cookie("User ID", user_ID);
     res.redirect("/urls");
     }
   }),
@@ -125,7 +125,7 @@ const users = {
     const templateVars = {
       shortURL: req.params.id,
       longURL: urlDatabase[req.params.id],
-      username: req.cookies["username"]
+      user_ID: req.cookies["user_ID"]
     };
     res.render("urls_show", templateVars);
    });
@@ -134,7 +134,7 @@ const users = {
   app.get("/urls/:id", (req, res) =>{
     const templateVars = {
       shortURL: req.params.id,
-      username: req.cookies["username"]
+      user_ID: req.cookies["user_ID"]
     };
     res.render("urls_show", templateVars);
   });
