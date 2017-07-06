@@ -5,6 +5,18 @@ const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
 
+const users = {
+  "userRandomID": {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur"
+  },
+  "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@exmaple.com"
+    password: "dishwasher-funk"
+  }
+}
 
   app.set("view engine", "ejs");
   app.use(bodyParser.urlencoded({extended: true}));
