@@ -32,21 +32,18 @@ const users = {
   return output;
 }
 
-   var urlDatabase = {
-     "userRandomID": {
-        "b2xVn2": "http://www.lighthouselabs.ca"
+  var urlDatabase = {
+     "b2xVn2": {
+        id: "userRandomID",
+        shortURL: "b2xVn2",
+        longURL: "http://www.lighthouselabs.ca"
       },
-    "user2RandomID": {
-        "9sm5xK": "http://www.google.com"
+    "9sm5xK": {
+        id: "user2RandomID",
+        shortURL: "9sm5xK",
+        longURL: "http://www.google.com"
     }
-   };
-
-    app.get("/urls/login", (req, res) => {
-      const templateVars = {
-      user_ID: req.cookies["User ID"]
-     };
-      res.render("urls_login", templateVars);
-    })
+  };
 
   //Registration Page
   app.get("/urls/registration", (req, res) => {
@@ -76,6 +73,14 @@ const users = {
      }
   }),
 
+  //Allows user to login
+  app.get("/urls/login", (req, res) => {
+      const templateVars = {
+      user_ID: req.cookies["User ID"]
+     };
+      res.render("urls_login", templateVars);
+    })
+
     //Allows person to login
     app.post("/urls/login", (req, res) => {
       var email = req.body.email
@@ -87,7 +92,7 @@ const users = {
           res.status(403).send('Login Failed :(');
         } else  {
       var user_ID = users[email].id;
-      res.cookie("User ID", user_ID);
+      res.cookie("User ID");
       res.redirect("/urls");
       }
     });
@@ -118,9 +123,14 @@ const users = {
   //Action when a new URL is Created
   //Posts the new URL on home page
   app.post("/urls", (req, res) => {
-    var shortURL = generateRandomString();
-    var userID = users[id];
-    urlDatabase[shortURL, userID] = req.body.longURL;
+    const shortURL = generateRandomString();
+    const urlObject = {
+    user_ID: req.cookies["User ID"],
+    shortURL: shortURL,
+    longURL: req.body.longURL
+  }
+    urlDatabase[shortURL] = urlObject
+    console.log(urlDatabase);
     res.redirect("/urls");
    });
 

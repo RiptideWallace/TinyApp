@@ -8,7 +8,7 @@
     <% include partials/_header %>
       <ul>
       <% for(var link in urls) { %>
-      <li><%= link + ': ' + urls[link] %></li>
+      <li><%= link + ': ' + urls[link].longURL %></li>
       <a href='/urls/<%= link %>'> Edit </a>
       <form method="POST" action="/urls/<%= link %>/delete">
       <input type="submit" value="Delete">
