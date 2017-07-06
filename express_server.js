@@ -76,6 +76,8 @@ const users = {
 
   //Action when a new person registers
   app.post("/urls/registration", (req, res) => {
+    var email = req.body.email
+    var password = req.body.password
     var user_ID = generateRandomString();
     var newUser = {
       id: user_ID,
@@ -83,9 +85,14 @@ const users = {
       password: req.body.password
     }
     users[user_ID] = newUser;
+
+    if (email || password === undefined) {
+      res.status(404).send('Registration Failed :(');
+    } else {
     res.cookie("User ID", users[user_ID]);
     res.redirect("/urls");
-  })
+    }
+  }),
 
 
   //Action when a new URL is Created
