@@ -13,7 +13,7 @@ const users = {
   },
   "user2RandomID": {
     id: "user2RandomID",
-    email: "user2@exmaple.com"
+    email: "user2@exmaple.com",
     password: "dishwasher-funk"
   }
 }
@@ -73,6 +73,20 @@ const users = {
     };
     res.render("urls_register", templateVars)
   });
+
+  //Action when a new person registers
+  app.post("/urls/registration", (req, res) => {
+    var user_ID = generateRandomString();
+    var newUser = {
+      id: user_ID,
+      email: req.body.email,
+      password: req.body.password
+    }
+    users[user_ID] = newUser;
+    res.cookie("User ID", users[user_ID]);
+    res.redirect("/urls");
+  })
+
 
   //Action when a new URL is Created
   //Posts the new URL on home page
