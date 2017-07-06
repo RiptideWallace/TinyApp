@@ -5,6 +5,7 @@ const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
 
+//Object used to store user information once they register
 const users = {
   "userRandomID": {
     id: "userRandomID",
@@ -23,10 +24,10 @@ const users = {
 
  function generateRandomString(){
   var output = ""
-  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+  var characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
   for (var i = 0; i < 6; i++)
-    output += possible.charAt(Math.floor(Math.random() * possible.length));
+    output += characters.charAt(Math.floor(Math.random() * characters.length));
 
   return output;
 }
@@ -36,15 +37,23 @@ const users = {
      "9sm5xK": "http://www.google.com"
    };
 
+    app.get("/urls/login", (req, res) => {
+      const templateVars = {
+      user_ID: req.cookies["User ID"]
+     };
+      res.render("urls_login", templateVars);
+    })
+
     //Allows person to login
     app.post("/urls/login", (req, res) => {
-      res.cookie("username", req.body.username);
+      var user_ID = generateRandomString();
+      res.cookie("User ID", user_ID);
       res.redirect("/urls");
     });
 
     //Allows person to logout
     app.post("/urls/logout", (req, res) => {
-      var user_ID = generateRandomString;
+      var user_ID = generateRandomString();
       res.clearCookie("User ID", user_ID);
       res.redirect("/urls");
     })
@@ -86,12 +95,12 @@ const users = {
     }
     users[user_ID] = newUser;
 
-    if (email || password === undefined) {
-       res.status(404).send('Registration Failed :(');
+     if (email || password === undefined) {
+        res.status(404).send('Registration Failed :(');
      } else {
     res.cookie("User ID", user_ID);
     res.redirect("/urls");
-    }
+     }
   }),
 
 
@@ -139,8 +148,7 @@ const users = {
     res.render("urls_show", templateVars);
   });
 
-
-
+  //Redirects the user to website their shortURL is assigned with
   app.get("/u/:shortURL", (req, res) => {
    const longURL = urlDatabase[req.params.shortURL];
    res.redirect(longURL);

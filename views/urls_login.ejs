@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <title>TinyApp</title>
+</head>
+ <% include partials/_header %>
+    <h1>Login</h1>
+    <form action="/urls/login" method="POST" style="margin:20px;">
+      <label for="email">E-Mail:</label>
+      <input id="email" type="email" name="email" placeholder= "Type Your E-Mail" style="width: 150px">
+      <label for="password">Password:</label>
+      <input id="password" type="password" name="password" placeholder="Choose A Password" style="width: 150px">
+      <input type="submit" value="Submit">
+    </form>
+  </body>
+</html>
