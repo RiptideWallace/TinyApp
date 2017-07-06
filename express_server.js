@@ -47,8 +47,17 @@ const users = {
     //Allows person to login
     app.post("/urls/login", (req, res) => {
       var user_ID = generateRandomString();
+      var email = req.body.email
+      var password = req.body.password
+
+      if (email != email) {
+         res.status(403).send('Login Failed :(');
+      } else if (password != password) {
+          res.status(403).send('Login Failed :(');
+        } else {
       res.cookie("User ID", user_ID);
       res.redirect("/urls");
+      }
     });
 
     //Allows person to logout
