@@ -32,6 +32,18 @@ const users = {
   return output;
 }
 
+function urlsForUser(id) {
+  var output = {};
+  for (var key in urlDatabase) {
+    var URL = urlDatabase[key]
+    if (id === URL.id) {
+      output[key] = URL;
+    }
+  };
+  return output
+};
+
+
   var urlDatabase = {
      "b2xVn2": {
         id: "userRandomID",
@@ -90,7 +102,7 @@ const users = {
          res.status(403).send('Login Failed :(');
       } else if (password != users[email].password) {
           res.status(403).send('Login Failed :(');
-        } else  {
+        } else {
       var user_ID = users[email].id;
       res.cookie("User ID");
       res.redirect("/urls");
@@ -105,8 +117,10 @@ const users = {
 
     //Home Page: Displays Submitted URL Data
     app.get("/urls", (req, res) => {
+      const id = req.cookies["User ID"];
+      const ownUserURLs = urlsForUser(id)
       const templateVars = {
-        urls: urlDatabase,
+        urls: ownUserURLs,
         user_ID: req.cookies["User ID"]
       };
       res.render("urls_index", templateVars);
@@ -125,7 +139,7 @@ const users = {
   app.post("/urls", (req, res) => {
     const shortURL = generateRandomString();
     const urlObject = {
-    user_ID: req.cookies["User ID"],
+    id: req.cookies["User ID"],
     shortURL: shortURL,
     longURL: req.body.longURL
   }
@@ -146,8 +160,13 @@ const users = {
 //Ability to delete existing URLs
   //Redirects us back to the home page
   app.post("/urls/:id/delete", (req, res) =>{
+    const user_ID = req.cookies["User ID"];
+     if (user_ID != urlDatabase[req.params.id].id) {
+      res.status(403).send('You Cannot Delete this URL :(');
+         } else {
     delete urlDatabase[req.params.id];
     res.redirect("/urls");
+    }
   });
 
   //Takes us to the individual page of a URL
