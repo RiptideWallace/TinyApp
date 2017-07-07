@@ -75,7 +75,7 @@ function urlsForUser(id) {
     var email = req.body.email
     var password = req.body.password
     var user_ID = generateRandomString();
-    var hashed_password = bcrypt.hashSync(password, 10);
+    var hashed_password = bcrypt.hashSync(req.body.password, 10);
     var newUser = {
       id: user_ID,
       email: req.body.email,
@@ -86,7 +86,6 @@ function urlsForUser(id) {
      if (email == false || password == false) {
         res.status(404).send('Registration Failed :(');
      } else {
-    bcrypt.compareSync(req.body.password, hashed_password)
     req.session.id = newUser.id;
     console.log(users);
     res.redirect("/urls");
@@ -103,16 +102,18 @@ function urlsForUser(id) {
 
     //Allows person to login
     app.post("/urls/login", (req, res) => {
-      var email = req.body.email
-      var password = req.body.password
+      var email = req.body.email;
+      var hashed_password = users[email].password;
+      var password = hashed_password;
 
       if (!users[email] || email != users[email].email) {
          res.status(403).send('Login Failed :(');
-      } else if (password != users[email].password) {
-          res.status(403).send('Login Failed :(');
+      } else if (!bcrypt.compareSync(req.body.password, users[email].password)) {
+          res.status(403).send('Login Failed :(!');
         } else {
+          console.log(password, users[email].password);
       var id = users[email].id;
-      req.session.id;
+      req.session.id = id;
       res.redirect("/urls");
       }
     });
@@ -199,8 +200,8 @@ function urlsForUser(id) {
 
   //Redirects the user to website their shortURL is assigned with
   app.get("/u/:shortURL", (req, res) => {
-   const longURL = urlDatabase[req.params.shortURL];
-   res.redirect(longURL);
+   let longURL = urlDatabase[req.params.shortURL].longURL;
+   res.redirect("http://" + longURL);
    });
 
    app.get("/urls.json", (req, res) => {
