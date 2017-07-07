@@ -65,7 +65,8 @@ function urlsForUser(id) {
   //Registration Page
   app.get("/urls/registration", (req, res) => {
     const templateVars = {
-      user_ID: req.session.id
+      user_ID: req.session.id,
+      user: users[req.session.email]
     };
     res.render("urls_register", templateVars)
   });
@@ -76,26 +77,32 @@ function urlsForUser(id) {
     var password = req.body.password
     var user_ID = generateRandomString();
     var hashed_password = bcrypt.hashSync(req.body.password, 10);
+
+    if (email == false || password == false) {
+        res.status(404).send('Registration Failed :(');
+        return;
+     } else if (users[email] !== undefined) {
+        res.status(404).send('Email Already in Use');
+      return;
+      }
+
     var newUser = {
       id: user_ID,
       email: req.body.email,
       password: hashed_password
     }
     users[req.body.email] = newUser;
-
-     if (email == false || password == false) {
-        res.status(404).send('Registration Failed :(');
-     } else {
     req.session.id = newUser.id;
+    req.session.email = newUser.email;
     console.log(users);
     res.redirect("/urls");
-     }
   }),
 
   //Allows user to login
   app.get("/urls/login", (req, res) => {
       const templateVars = {
-      user_ID: req.session.id
+      user_ID: req.session.id,
+      user: users[req.session.email]
      };
       res.render("urls_login", templateVars);
     })
@@ -103,19 +110,26 @@ function urlsForUser(id) {
     //Allows person to login
     app.post("/urls/login", (req, res) => {
       var email = req.body.email;
+
+
+      if (!users[email] || users[email] === undefined) {
+         res.status(403).send('Login Failed :(');
+         return;
+      }
+
       var hashed_password = users[email].password;
       var password = hashed_password;
 
-      if (!users[email] || email != users[email].email) {
-         res.status(403).send('Login Failed :(');
-      } else if (!bcrypt.compareSync(req.body.password, users[email].password)) {
+      if (!bcrypt.compareSync(req.body.password, password)) {
           res.status(403).send('Login Failed :(!');
-        } else {
+          return;
+      }
+
           console.log(password, users[email].password);
       var id = users[email].id;
       req.session.id = id;
+      req.session.email = email;
       res.redirect("/urls");
-      }
     });
 
     //Allows person to logout
@@ -127,10 +141,12 @@ function urlsForUser(id) {
     //Home Page: Displays Submitted URL Data
     app.get("/urls", (req, res) => {
       const id = req.session.id;
-      const ownUserURLs = urlsForUser(id)
+      const user = users[req.session.email];
+      const ownUserURLs = urlsForUser(id);
       const templateVars = {
         urls: ownUserURLs,
-        user_ID: id
+        user_ID: id,
+        user: user
       };
       res.render("urls_index", templateVars);
    });
@@ -138,7 +154,8 @@ function urlsForUser(id) {
   //Page to Create A New TinyURL
   app.get("/urls/new", (req, res) => {
     const templateVars = {
-      user_ID: req.session.id
+      user_ID: req.session.id,
+      user: users[req.session.email]
     };
     res.render("urls_new", templateVars);
   });
@@ -153,16 +170,14 @@ function urlsForUser(id) {
     longURL: req.body.longURL
   }
     urlDatabase[shortURL] = urlObject
-    console.log(urlDatabase);
-    res.redirect("/urls");
+    res.redirect("/urls/" + shortURL);
    });
 
   //The action that happens when a URL is updated
   //Redirects us back to the home page
   app.post("/urls/:id", (req, res) => {
     var updateURL = req.body.updateURL;
-    longURL = updateURL
-    urlDatabase[req.params.id] = updateURL;
+    urlDatabase[req.params.id].longURL = updateURL;
     res.redirect("/urls");
   });
 
@@ -183,8 +198,9 @@ function urlsForUser(id) {
   app.get("/urls/:id", (req, res) => {
     const templateVars = {
       shortURL: req.params.id,
-      longURL: urlDatabase[req.params.id],
-      user_ID: req.session.id
+      longURL: urlDatabase[req.params.id].longURL,
+      user_ID: req.session.id,
+      user: users[req.session.email]
     };
     res.render("urls_show", templateVars);
    });
@@ -193,7 +209,8 @@ function urlsForUser(id) {
   app.get("/urls/:id", (req, res) =>{
     const templateVars = {
       shortURL: req.params.id,
-      user_ID: req.session.id
+      user_ID: req.session.id,
+      user: users[req.session.email]
     };
     res.render("urls_show", templateVars);
   });
@@ -202,7 +219,7 @@ function urlsForUser(id) {
   app.get("/u/:shortURL", (req, res) => {
    let longURL = urlDatabase[req.params.shortURL].longURL;
    res.redirect("http://" + longURL);
-   });
+  });
 
    app.get("/urls.json", (req, res) => {
      res.json(urlDatabase);
@@ -211,4 +228,3 @@ function urlsForUser(id) {
  app.listen(PORT, () => {
    console.log(`Example app listening on port ${PORT}!`);
  });
-

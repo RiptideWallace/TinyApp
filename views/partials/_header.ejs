@@ -1,10 +1,12 @@
 <h1>Shorten Your URL</h1>
-<h3><%= user_ID %></h3>
+<% if (user) { %>
+<h3><%= user.email %></h3>
   <form action ="/urls/logout" method="POST" style ="margin:20px;">
     <input type="submit" value="Logout">
   </form>
+<% } else { %>
 <a href="/urls/registration">Register</a>
 <a href="/urls/login">Login</a>
-
+<% } %>
 
 
