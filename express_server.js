@@ -2,8 +2,13 @@ var express = require('express');
 var app = express();
 var PORT = 8080; //default port 8080
 const bodyParser = require("body-parser");
-const cookieParser = require('cookie-parser');
-app.use(cookieParser());
+const cookieSession = require('cookie-session');
+const bcrypt = require('bcrypt');
+app.use(cookieSession({
+  name: 'session',
+  keys: ['chilli donuts'],
+  maxAge: 24 * 60 * 60 * 1000
+}));
 
 //Object used to store user information once they register
 const users = {
@@ -60,7 +65,7 @@ function urlsForUser(id) {
   //Registration Page
   app.get("/urls/registration", (req, res) => {
     const templateVars = {
-      user_ID: req.cookies["User ID"]
+      user_ID: req.session.id
     };
     res.render("urls_register", templateVars)
   });
@@ -70,17 +75,20 @@ function urlsForUser(id) {
     var email = req.body.email
     var password = req.body.password
     var user_ID = generateRandomString();
+    var hashed_password = bcrypt.hashSync(password, 10);
     var newUser = {
       id: user_ID,
       email: req.body.email,
-      password: req.body.password
+      password: hashed_password
     }
     users[req.body.email] = newUser;
 
      if (email == false || password == false) {
         res.status(404).send('Registration Failed :(');
      } else {
-    res.cookie("User ID", user_ID);
+    bcrypt.compareSync(req.body.password, hashed_password)
+    req.session.id = newUser.id;
+    console.log(users);
     res.redirect("/urls");
      }
   }),
@@ -88,7 +96,7 @@ function urlsForUser(id) {
   //Allows user to login
   app.get("/urls/login", (req, res) => {
       const templateVars = {
-      user_ID: req.cookies["User ID"]
+      user_ID: req.session.id
      };
       res.render("urls_login", templateVars);
     })
@@ -103,25 +111,25 @@ function urlsForUser(id) {
       } else if (password != users[email].password) {
           res.status(403).send('Login Failed :(');
         } else {
-      var user_ID = users[email].id;
-      res.cookie("User ID");
+      var id = users[email].id;
+      req.session.id;
       res.redirect("/urls");
       }
     });
 
     //Allows person to logout
     app.post("/urls/logout", (req, res) => {
-      res.clearCookie("User ID");
+      req.session = null;
       res.redirect("/urls");
     })
 
     //Home Page: Displays Submitted URL Data
     app.get("/urls", (req, res) => {
-      const id = req.cookies["User ID"];
+      const id = req.session.id;
       const ownUserURLs = urlsForUser(id)
       const templateVars = {
         urls: ownUserURLs,
-        user_ID: req.cookies["User ID"]
+        user_ID: id
       };
       res.render("urls_index", templateVars);
    });
@@ -129,7 +137,7 @@ function urlsForUser(id) {
   //Page to Create A New TinyURL
   app.get("/urls/new", (req, res) => {
     const templateVars = {
-      user_ID: req.cookies["User ID"]
+      user_ID: req.session.id
     };
     res.render("urls_new", templateVars);
   });
@@ -139,7 +147,7 @@ function urlsForUser(id) {
   app.post("/urls", (req, res) => {
     const shortURL = generateRandomString();
     const urlObject = {
-    id: req.cookies["User ID"],
+    id: req.session.id,
     shortURL: shortURL,
     longURL: req.body.longURL
   }
@@ -160,7 +168,7 @@ function urlsForUser(id) {
 //Ability to delete existing URLs
   //Redirects us back to the home page
   app.post("/urls/:id/delete", (req, res) =>{
-    const user_ID = req.cookies["User ID"];
+    const user_ID = req.session.id;
      if (user_ID != urlDatabase[req.params.id].id) {
       res.status(403).send('You Cannot Delete this URL :(');
          } else {
@@ -175,7 +183,7 @@ function urlsForUser(id) {
     const templateVars = {
       shortURL: req.params.id,
       longURL: urlDatabase[req.params.id],
-      user_ID: req.cookies["user_ID"]
+      user_ID: req.session.id
     };
     res.render("urls_show", templateVars);
    });
@@ -184,7 +192,7 @@ function urlsForUser(id) {
   app.get("/urls/:id", (req, res) =>{
     const templateVars = {
       shortURL: req.params.id,
-      user_ID: req.cookies["user_ID"]
+      user_ID: req.session.id
     };
     res.render("urls_show", templateVars);
   });
