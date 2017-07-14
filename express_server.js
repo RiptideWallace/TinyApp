@@ -75,10 +75,10 @@ app.post("/urls/registration", (req, res) => {
   let user_ID = generateRandomString();
   let hashed_password = bcrypt.hashSync(req.body.password, 10);
 
-  if (email == false || password == false) {
+  if (email === false || password === false) {
       res.status(404).send('Registration Failed :(');
       return;
-  } else if (users[email] !== undefined) {
+  } else if (users[email] !=== undefined) {
       res.status(404).send('Email Already in Use');
       return;
     }
