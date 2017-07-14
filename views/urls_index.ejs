@@ -4,24 +4,24 @@
     <title>TinyApp</title>
   </head>
   <% if (user) { %>
-    <body>
-    <% include partials/_header %>
-      <ul>
-      <% for(var link in urls) { %>
-      <li><%= link + ': ' + urls[link].longURL %></li>
-      <a href='/urls/<%= link %>'> Edit </a>
-      <form method="POST" action="/urls/<%= link %>/delete">
-      <input type="submit" value="Delete">
-      </form>
-      <% } %>
-      </ul>
-      <a href='/urls/new'>Shorten Your URL!</a>
-      <% } else { %>
-      <h1>Shorten Your URL</h1>
-      <p>You Need to Register/Login to Shorten A URL</p>
-      <a href="/urls/registration"> Register</a>
-      <a href="/urls/login">Log In</a>
-    </body>
+  <body>
+  <% include partials/_header %>
+    <ul>
+    <% for(var link in urls) { %>
+    <li><%= link + ': ' + urls[link].longURL %></li>
+    <a href='/urls/<%= link %>'> Edit </a>
+    <form method="POST" action="/urls/<%= link %>/delete">
+    <input type="submit" value="Delete">
+    </form>
+    <% } %>
+    </ul>
+    <a href='/urls/new'>Shorten Your URL!</a>
+    <% } else { %>
+    <h1>Shorten Your URL</h1>
+    <p>You Need to Register/Login to Shorten A URL</p>
+    <a href="/urls/registration"> Register</a>
+    <a href="/urls/login">Log In</a>
+  </body>
 </html>
 <% } %>
 
